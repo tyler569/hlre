@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 pcap = "0.7.0"
+libc = "0.2.67"
