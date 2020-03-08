@@ -90,3 +90,119 @@ mod tests {
         assert_eq!(pkt_dst(EXAMPLE_PACKET_ENCAP), dst);
     }
 }
+
+
+// thoughts
+
+/*
+type ArpTable = HashMap<IpAddress, MacAddress>
+
+struct Interface {
+    raw: pcap::Capture,
+    mac: MacAddress,
+    ip: Ip4Address,
+    subnet: Ip4Subnet,
+    ip6: Ip6Address,
+    subnet6: Ip6Subnet,
+    arp_table: ArpTable,
+}
+
+enum IpAddress {
+    Ip4(Ip4Address),
+    Ip6(Ip6Address),
+}
+
+struct FlowRef {
+    ethertype: EtherType,
+    protocol: IpProtocol,
+    source_3: IpAddress,
+    source_4: PortAddress,
+    destination_3: IpAddress,
+    destination_4: PortAddress,
+}
+
+enum FlowRule {
+    Drop,
+    Pass(Interface),
+    NextHop(IpAddress, Interface),
+}
+
+struct Flow {
+    ident: FlowRef,
+    source_to_destination: FlowRule, // NextHop(10.1.2.3, Wan)
+    destination_to_source: FlowRule, // NextHop(source, Lan)
+}
+
+struct Controller {
+    flow_table: HashMap<FlowRef, Flow>,
+}
+
+impl Controller {
+    fn new() -> Controller {
+        c = Controller {
+            flow_table: HashMap::new(),
+        }
+    }
+    fn query_flow_disposition(&self, fl: FlowRef) {
+        if self.flow_table.contains_key(fl) {
+            self.flow_table[fl]
+        } else {
+            // something else
+        }
+    }
+}
+
+struct Annotation {
+
+}
+
+struct Packet {
+    pcap_pkt: pcap::Packet,
+    anno: Annotation,
+}
+
+impl Deref<target = pcap::Packet> for Packet {
+    fn deref(self) -> pcap::Packet {
+        self.pcap_pkt
+    }
+}
+
+fn pull_packets(cap: pcap::Capture, pq: mpsc::Sender<Packet>) {
+    loop {
+        
+    }
+}
+
+fn main() {
+    
+}
+
+fn route_packet(c: Controller, pq: mpsc::Reciever) {
+    let p: Packet = pq.recv().unwrap();
+    let fl = FlowRef::from(p);
+
+    if let Some(rules) = CONTROLLER.query_flow_disposition(fl) {
+        let rule = if fl.source_ip == p.source_ip {
+            rules.source_to_destination
+        } else {
+            rules.destination_to_source
+        }
+
+        match rule {
+            Drop => {},
+            Pass(iface) => {
+                iface.sendpacket(p)
+            },
+            NextHop(ip, iface) => {
+                let mac = iface.arplookup(ip);
+                // THIS CAN TAKE TIME OR FAIL
+                p.transform_dst_mac(mac);
+                p.transform_src_mac(iface.my_mac());
+                iface.sendpacket(p);
+            }
+        }
+    } else {
+        // Drop
+    }
+}
+*/
