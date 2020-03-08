@@ -10,23 +10,18 @@ struct MacAddress {
     data: [u8; 6],
 }
 
-impl TryFrom<&[u8]> for MacAddress {
-    type Error = std::array::TryFromSliceError;
-
-    fn try_from(d: &[u8]) -> Result<MacAddress, Self::Error> {
-        let arr: [u8; 6] = d.try_into()?;
-        Ok(MacAddress { data: arr })
-    }
-}
-
 fn pkt_dst(p: Packet) -> MacAddress {
     let mac: &[u8] = &p[0..6];
-    mac.try_into().unwrap()
+    MacAddress {
+        data: mac.try_into().unwrap()
+    }
 }
 
 fn pkt_src(p: Packet) -> MacAddress {
     let mac: &[u8] = &p[6..12];
-    mac.try_into().unwrap()
+    MacAddress {
+        data: mac.try_into().unwrap()
+    }
 }
 
 fn main() {
