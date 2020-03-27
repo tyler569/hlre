@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/gopacket"
+	_ "github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 )
 
@@ -12,7 +13,7 @@ func handlePacket(packet gopacket.Packet) {
 }
 
 var (
-	outbound_icmp = []byte {
+	outbound_icmp = []byte{
 		0x00, 0x18, 0x0a, 0x85, 0x47, 0x88,
 		0x9c, 0xb6, 0xd0, 0x8b, 0x42, 0x93,
 		0x08, 0x00,
@@ -32,9 +33,18 @@ var (
 	}
 )
 
+func bridgeAdapters(a, b *pcap.Handle) {
+	packetSource := gopacket.NewPacketSource(a, a.LinkType())
+	for packet := range packetSource.Packets() {
+		fmt.Print(".")
+		b.WritePacketData(packet.Data())
+	}
+}
+
 func main() {
 	// fmt.Println("This is a prototype of the flow router")
 
+	/*
 	handle, err := pcap.OpenLive("wlp2s0", 1600, true, pcap.BlockForever)
 	if err != nil {
 		panic(err)
@@ -44,4 +54,19 @@ func main() {
 	for packet := range packetSource.Packets() {
 		handlePacket(packet)
 	}
+	*/
+
+	pcap_default, err := pcap.OpenLive("v-0-default", 1600, true, pcap.BlockForever)
+	if err != nil {
+		panic(err)
+	}
+
+	pcap_red, err := pcap.OpenLive("v-1-red", 1600, true, pcap.BlockForever)
+	if err != nil {
+		panic(err)
+	}
+
+	go bridgeAdapters(pcap_default, pcap_red)
+	bridgeAdapters(pcap_red, pcap_default)
 }
+
